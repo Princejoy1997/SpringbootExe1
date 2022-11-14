@@ -1,6 +1,7 @@
 package com.student.ust.controller;
 
 import com.student.ust.entity.Student;
+import com.student.ust.exception.BusinessException;
 import com.student.ust.service.StudentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +12,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * The type Student controller.
+ */
 @RestController
 @Slf4j
 public class StudentController {
 
+    /**
+     * The Student service.
+     */
     @Autowired
     StudentService studentService;
 
+    /**
+     * Get response entity.
+     *
+     * @param studentID the student id
+     * @return the response entity
+     */
     @GetMapping("/student/{studentID}")
     public ResponseEntity<Student>get(@PathVariable Integer studentID){
         try{
@@ -29,6 +42,12 @@ public class StudentController {
         }
     }
 
+    /**
+     * Gets student by request param.
+     *
+     * @param studentID the student id
+     * @return the student by request param
+     */
     @GetMapping("/students")
     public ResponseEntity<Student> getStudentByRequestParam(@RequestParam(name = "id") Integer studentID){
         try{
@@ -40,6 +59,11 @@ public class StudentController {
         }
     }
 
+    /**
+     * Get all response entity.
+     *
+     * @return the response entity
+     */
     @GetMapping("/student")
     public ResponseEntity<List<Student>> getAll(){
         try{
@@ -50,19 +74,45 @@ public class StudentController {
         }
     }
 
+    /**
+     * Update student.
+     *
+     * @param student the student
+     */
     @PutMapping("/student")
     public void updateStudent(@RequestBody Student student) {
         studentService.updateStudent(student);
     }
 
+    /**
+     * Remove.
+     *
+     * @param studentID the student id
+     */
     @DeleteMapping("/student/{studentID}")
     public void remove(@PathVariable Integer studentID ){
         studentService.deleteStudent(studentID);
     }
 
+    /**
+     * Add response entity.
+     *
+     * @param student the student
+     * @return the response entity
+     */
     @PostMapping("/student")
-    public void add(@RequestBody Student student){
-        studentService.saveStudent(student);
+    public ResponseEntity<Student> add(@RequestBody Student student) {
+        try{
+        int resultEmail=studentService.emailValidate(student.getEmail());
+        int resultPassword=studentService.passwordValidate(student.getPassword());
+        if(resultEmail==0) {
+            studentService.saveStudent(student);
+        }
+        return new ResponseEntity<Student>(student,HttpStatus.OK);
+        }
+        catch (BusinessException e) {
+            return new ResponseEntity<Student>(HttpStatus.PRECONDITION_FAILED);
+        }
+        }
     }
 
-}

@@ -3,11 +3,13 @@ package com.student.ust.entity;
 import lombok.Data;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+/**
+ * The type Student.
+ */
 @Entity
 @Data
 @Table(name = "student_mappedby")
@@ -21,9 +23,10 @@ public class Student {
     private int age;
     private int rollNo;
 
-    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}",
-            flags = Pattern.Flag.CASE_INSENSITIVE)
-    String emailAddress;
+    @NotNull
+    private String email;
+    @NotNull
+    private String password;
 
     private LocalDateTime createDate;
     private LocalDateTime modifyDate;
