@@ -3,6 +3,7 @@ package com.student.ust.controller;
 import com.student.ust.entity.Student;
 import com.student.ust.exception.BusinessException;
 import com.student.ust.service.StudentService;
+import com.student.ust.util.UstUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,7 @@ public class StudentController {
         try{
             Student student=studentService.getStudentByID(studentID);
             //log.debug("hi log"+studentID); //for debugging
+
             return new ResponseEntity<Student>(student, HttpStatus.OK);
         } catch (NoSuchElementException e){
             return new ResponseEntity<Student>(HttpStatus.NOT_FOUND);
@@ -53,6 +55,8 @@ public class StudentController {
         try{
             Student student=studentService.getStudentByID(studentID);
             //log.debug("hi log"+studentID); //for debugging
+            student.setEmail("");
+            student.setPassword("");
             return new ResponseEntity<Student>(student, HttpStatus.OK);
         } catch (NoSuchElementException e){
             return new ResponseEntity<Student>(HttpStatus.NOT_FOUND);
@@ -91,6 +95,7 @@ public class StudentController {
      */
     @DeleteMapping("/student/{studentID}")
     public void remove(@PathVariable Integer studentID ){
+
         studentService.deleteStudent(studentID);
     }
 
@@ -103,16 +108,13 @@ public class StudentController {
     @PostMapping("/student")
     public ResponseEntity<Student> add(@RequestBody Student student) {
         try{
-        int resultEmail=studentService.emailValidate(student.getEmail());
-        int resultPassword=studentService.passwordValidate(student.getPassword());
-        if(resultEmail==0) {
             studentService.saveStudent(student);
-        }
-        return new ResponseEntity<Student>(student,HttpStatus.OK);
         }
         catch (BusinessException e) {
             return new ResponseEntity<Student>(HttpStatus.PRECONDITION_FAILED);
         }
-        }
+        return new ResponseEntity<Student>(student, HttpStatus.OK);
+    }
+
     }
 

@@ -1,16 +1,21 @@
 package com.student.ust.service;
 
 import com.student.ust.entity.Student;
+import com.student.ust.exception.BusinessException;
 import com.student.ust.exception.InvalidEmail;
+import com.student.ust.exception.InvalidPassword;
 import com.student.ust.repository.StudentRepository;
+import com.student.ust.util.UstUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static com.student.ust.util.UstUtil.hashPassword;
 
 /**
  * The type Student service.
@@ -32,8 +37,12 @@ public class StudentService {
      * @throws NoSuchElementException the no such element exception
      */
     public Student getStudentByID(Integer studentID)throws NoSuchElementException {
+
+        Student student= studentRepository.findById(studentID).orElseThrow(()->new NoSuchElementException());
         //System.out.println(studentRepository.findByName("jayanth").getName());
-        return studentRepository.findById(studentID).orElseThrow(()->new NoSuchElementException());
+        student.setEmail("");
+        student.setPassword("");
+        return student;
     }
 
     /**
@@ -46,7 +55,17 @@ public class StudentService {
 
         student.setCreateDate(LocalDateTime.now());
         student.setModifyDate(student.getCreateDate());
-        return studentRepository.save(student);
+
+        int resultEmail= UstUtil.emailValidate(student.getEmail());
+        int resultPassword=UstUtil.passwordValidate(student.getPassword());
+        if(resultEmail==0 && resultPassword== 0){
+            student.setPassword(hashPassword(student.getPassword()));
+            studentRepository.save(student);
+        }
+        else {
+            throw new BusinessException("Invalid Email or Password");
+        }
+        return new ResponseEntity<Student>(student, HttpStatus.OK).getBody();
     }
 
     /**
@@ -84,34 +103,5 @@ public class StudentService {
 
         studentRepository.save(updateStudent);
         return updateStudent;
-    }
-
-
-    /**
-     * Email validate int.
-     *
-     * @param email the email
-     * @return the int
-     */
-    public int emailValidate(String email) {
-        String regex="^([A-Za-z0-9+_.-]+)@([A-Za-z0-9]+)\\.([a-z])$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(email);
-        if(matcher.matches()==true){
-            return 0;
-        }
-        else {
-            throw new InvalidEmail();
-        }
-    }
-
-    /**
-     * Password validate int.
-     *
-     * @param password the password
-     * @return the int
-     */
-    public int passwordValidate(String password) {
-        return passwordValidate(password);
     }
 }
