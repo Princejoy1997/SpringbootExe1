@@ -1,9 +1,9 @@
 package com.student.ust.controller;
 
+import com.student.ust.dto.StudentDto;
 import com.student.ust.entity.Student;
 import com.student.ust.exception.BusinessException;
 import com.student.ust.service.StudentService;
-import com.student.ust.util.UstUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,14 +33,14 @@ public class StudentController {
      * @return the response entity
      */
     @GetMapping("/student/{studentID}")
-    public ResponseEntity<Student>get(@PathVariable Integer studentID){
+    public ResponseEntity<StudentDto>get(@PathVariable Integer studentID){
         try{
             Student student=studentService.getStudentByID(studentID);
             //log.debug("hi log"+studentID); //for debugging
 
-            return new ResponseEntity<Student>(student, HttpStatus.OK);
+            return new ResponseEntity<StudentDto>(studentService.convertToDto(student), HttpStatus.OK);
         } catch (NoSuchElementException e){
-            return new ResponseEntity<Student>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<StudentDto>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -51,15 +51,13 @@ public class StudentController {
      * @return the student by request param
      */
     @GetMapping("/students")
-    public ResponseEntity<Student> getStudentByRequestParam(@RequestParam(name = "id") Integer studentID){
+    public ResponseEntity<StudentDto> getStudentByRequestParam(@RequestParam(name = "id") Integer studentID){
         try{
             Student student=studentService.getStudentByID(studentID);
             //log.debug("hi log"+studentID); //for debugging
-            student.setEmail("");
-            student.setPassword("");
-            return new ResponseEntity<Student>(student, HttpStatus.OK);
+            return new ResponseEntity<StudentDto>(studentService.convertToDto(student), HttpStatus.OK);
         } catch (NoSuchElementException e){
-            return new ResponseEntity<Student>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<StudentDto>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -85,6 +83,7 @@ public class StudentController {
      */
     @PutMapping("/student")
     public void updateStudent(@RequestBody Student student) {
+
         studentService.updateStudent(student);
     }
 

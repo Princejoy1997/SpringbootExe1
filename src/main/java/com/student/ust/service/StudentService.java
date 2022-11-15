@@ -89,6 +89,7 @@ public class StudentService {
      * @param studentID the student id
      */
     public void deleteStudent(int studentID) {
+
         studentRepository.deleteById(studentID);
     }
 
